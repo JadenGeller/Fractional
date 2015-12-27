@@ -23,14 +23,18 @@ public struct Fractional<Number: IntegerType> {
 	/// The (always non-negative) denominator of the fraction.
 	public let denominator: Number
 	
-	/// Construct a fraction from a numerator and a denominator, reducing the result.
-	public init(numerator: Number, denominator: Number) {		
+	private init(numerator: Number, denominator: Number) {
 		var (numerator, denominator) = reduce(numerator: numerator, denominator: denominator)
 		if denominator < 0 { numerator *= -1; denominator *= -1 }
 								
 		self.numerator = numerator
 		self.denominator = denominator
 	}
+    
+    /// Create an instance initialized to `value`.
+    public init(_ value: Number) {
+        self.init(numerator: value, denominator: 1)
+    }
 }	
 
 extension Fractional: Equatable {}
@@ -40,6 +44,8 @@ public func ==<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Num
 
 extension Fractional: Comparable {}
 public func <<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Bool {
+    guard !lhs.isNaN && !rhs.isNaN else { return false }
+    guard lhs.isFinite && rhs.isFinite else { return lhs.numerator < rhs.numerator }
 	let (lhsNumerator, rhsNumerator, _) = Fractional.commonDenominator(lhs, rhs)
 	return lhsNumerator < rhsNumerator
 }
@@ -71,7 +77,7 @@ extension Fractional: Strideable {
 
 extension Fractional: IntegerLiteralConvertible {
 	public init(integerLiteral value: Number) {
-		self.init(numerator: value, denominator: 1)
+		self.init(value)
 	}
 }
 
@@ -131,8 +137,8 @@ public func +<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Numb
 	guard !lhs.isNaN && !rhs.isNaN else { return .NaN }
 	guard lhs.isFinite && rhs.isFinite else {
 		switch (lhs >= 0, rhs >= 0) {
-		case (false, false):   return -.infinity
-		case (true, true): return .infinity
+		case (false, false): return -.infinity
+		case (true, true):   return .infinity
 		default:			 return .NaN
 		}
 	}
@@ -153,11 +159,6 @@ public func *<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Numb
 /// Divide `lhs` and `rhs`, returning a reduced result.
 public func /<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Fractional<Number> {
 	return lhs * rhs.reciprocal
-}
-
-/// Construct a fraction from a numerator and a denominator, returning a reduced result.
-public func /<Number: IntegerType>(lhs: Number, rhs: Number) -> Fractional<Number> {
-	return Fractional(numerator: lhs, denominator: rhs)
 }
 
 extension Double {
