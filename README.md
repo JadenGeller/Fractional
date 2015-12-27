@@ -5,7 +5,7 @@ Represent precise rational numbers with the `Fractional<Number>` type. For conve
 Fractions are `IntegerLiteralConvertible`, so they can be written as simply as `1/2 as Fraction`.
 
 ```swift
-let x: Fraction = (5 + 3) / (8 * 2) - 3 + (2 / -9)
+let x: Fraction = (5 + 1) / (8 * 2) - 3
 print(x) // -> -21/8
 ```
 
