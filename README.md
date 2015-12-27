@@ -17,7 +17,6 @@ let z = Fraction(x) / Fraction(y)
 ```
 
 As you'd expect, you can add, subtract, multiply, and divide fractions. Further, they support some common operations such as `reciprocal`.
-
 ```swift
 func pow(base: Fraction, _ exponent: Int) -> Fraction {
     var result: Fraction = 1
@@ -30,3 +29,12 @@ func pow(base: Fraction, _ exponent: Int) -> Fraction {
 let y: Fraction = 1/2
 print(pow(y, 3)) // -> 1/8
 ```
+
+Upon division by zero, a fraction might become infinity or NaN.
+```swift
+print(1/0 as Fraction)  // -> +Inf
+print(-1/0 as Fraction) // -> -Inf
+print(0/0 as Fraction)  // -> NaN
+```
+
+You can easily check if a fraction is finite, infinite, or NaN as well with the appropriately named `isFinite`, `isInfinite`, and `isNaN` properties.
