@@ -35,5 +35,18 @@ class FractionalTests: XCTestCase {
         XCTAssertEqual(5/2 as Fraction, 1/4 * 10 as Fraction)
         XCTAssertEqual(1/2 as Fraction, (1/4) / (1/2) as Fraction)
     }
+    
+    func testPow() {
+        func pow(base: Fraction, _ exponent: Int) -> Fraction {
+            var result: Fraction = 1
+            for _ in 1...abs(exponent) {
+                result *= base
+            }
+            return exponent >= 0 ? result : result.reciprocal
+        }
+        
+        XCTAssertEqual(1/8 as Fraction, pow(1/2, 3))
+        XCTAssertEqual(9 as Fraction, pow(1/3, -2))
+    }
 }
 

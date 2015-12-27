@@ -144,10 +144,16 @@ public func +<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Numb
 	}
 	return lhs.advancedBy(rhs)
 }
+public func +=<Number: IntegerType>(inout lhs: Fractional<Number>, rhs: Fractional<Number>) {
+    lhs = lhs + rhs
+}
 
 /// Subtract `lhs` and `rhs`, returning a reduced result.
 public func -<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Fractional<Number> {
 	return lhs + -rhs
+}
+public func -=<Number: IntegerType>(inout lhs: Fractional<Number>, rhs: Fractional<Number>) {
+    lhs = lhs - rhs
 }
 
 /// Multiply `lhs` and `rhs`, returning a reduced result.
@@ -155,10 +161,16 @@ public func *<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Numb
 	let swapped = (Fractional(numerator: lhs.numerator, denominator: rhs.denominator), Fractional(numerator: rhs.numerator, denominator: lhs.denominator))
 	return Fractional(numerator: swapped.0.numerator * swapped.1.numerator, denominator: swapped.0.denominator * swapped.1.denominator)
 }
+public func *=<Number: IntegerType>(inout lhs: Fractional<Number>, rhs: Fractional<Number>) {
+    lhs = lhs * rhs
+}
 
 /// Divide `lhs` and `rhs`, returning a reduced result.
 public func /<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Fractional<Number> {
 	return lhs * rhs.reciprocal
+}
+public func /=<Number: IntegerType>(inout lhs: Fractional<Number>, rhs: Fractional<Number>) {
+    lhs = lhs / rhs
 }
 
 extension Double {
