@@ -31,13 +31,17 @@ class FractionalTests: XCTestCase {
     
     func testMath() {
         XCTAssertEqual(3/4 as Fraction, 1/2 + 1/4 as Fraction)
-        XCTAssertEqual(1 as Fraction, 3/4 * (3/4).reciprocal as Fraction)
+
+        // TODO(btc): If recipCase is not explicitly declared as Fractional<Int>, the compiler segfaults while typechecking the expression.
+        let recipCase: Fractional<Int> = 3/4 * (3/4).reciprocal
+        XCTAssertEqual(1 as Fraction, recipCase as Fraction)
+
         XCTAssertEqual(5/2 as Fraction, 1/4 * 10 as Fraction)
         XCTAssertEqual(1/2 as Fraction, (1/4) / (1/2) as Fraction)
     }
     
     func testPow() {
-        func pow(base: Fraction, _ exponent: Int) -> Fraction {
+        func pow(_ base: Fraction, _ exponent: Int) -> Fraction {
             var result: Fraction = 1
             for _ in 1...abs(exponent) {
                 result *= base

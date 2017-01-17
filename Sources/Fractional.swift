@@ -1,29 +1,30 @@
 public typealias Fraction = Fractional<Int>
 
-private func gcd<Number: IntegerType>(var lhs: Number, var _ rhs: Number) -> Number {
+private func gcd<Number: Integer>(_ lhs: Number, _ rhs: Number) -> Number {
+	var lhs = lhs, rhs = rhs
 	while rhs != 0 { (lhs, rhs) = (rhs, lhs % rhs) }
 	return lhs
 }
 	
-private func lcm<Number: IntegerType>(lhs: Number, _ rhs: Number) -> Number {
+private func lcm<Number: Integer>(_ lhs: Number, _ rhs: Number) -> Number {
 	return lhs * rhs / gcd(lhs, rhs)
 }
 
-private func reduce<Number: IntegerType>(numerator numerator: Number, denominator: Number) -> (numerator: Number, denominator: Number) {
+private func reduce<Number: Integer>(numerator: Number, denominator: Number) -> (numerator: Number, denominator: Number) {
 	var divisor = gcd(numerator, denominator)
 	if divisor < 0 { divisor *= -1 }
 	guard divisor != 0 else { return (numerator: numerator, denominator: 0) }
 	return (numerator: numerator / divisor, denominator: denominator / divisor)
 }
 
-public struct Fractional<Number: IntegerType> {
+public struct Fractional<Number: Integer> {
 	/// The numerator of the fraction.
 	public let numerator: Number
 	
 	/// The (always non-negative) denominator of the fraction.
 	public let denominator: Number
 	
-	private init(numerator: Number, denominator: Number) {
+	fileprivate init(numerator: Number, denominator: Number) {
 		var (numerator, denominator) = reduce(numerator: numerator, denominator: denominator)
 		if denominator < 0 { numerator *= -1; denominator *= -1 }
 								
@@ -38,12 +39,12 @@ public struct Fractional<Number: IntegerType> {
 }	
 
 extension Fractional: Equatable {}
-public func ==<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Bool {
+public func ==<Number: Integer>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Bool {
 	return lhs.numerator == rhs.numerator && lhs.denominator == rhs.denominator
 }
 
 extension Fractional: Comparable {}
-public func <<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Bool {
+public func <<Number: Integer>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Bool {
     guard !lhs.isNaN && !rhs.isNaN else { return false }
     guard lhs.isFinite && rhs.isFinite else { return lhs.numerator < rhs.numerator }
 	let (lhsNumerator, rhsNumerator, _) = Fractional.commonDenominator(lhs, rhs)
@@ -57,7 +58,7 @@ extension Fractional: Hashable {
 }
 
 extension Fractional: Strideable {
-	private static func commonDenominator(lhs: Fractional, _ rhs: Fractional) -> (lhsNumerator: Number, rhsNumberator: Number, denominator: Number) {
+	fileprivate static func commonDenominator(_ lhs: Fractional, _ rhs: Fractional) -> (lhsNumerator: Number, rhsNumberator: Number, denominator: Number) {
 		let denominator = lcm(lhs.denominator, rhs.denominator)
 		let lhsNumerator = lhs.numerator * (denominator / lhs.denominator)
 		let rhsNumerator = rhs.numerator * (denominator / rhs.denominator)
@@ -65,24 +66,24 @@ extension Fractional: Strideable {
 		return (lhsNumerator, rhsNumerator, denominator)
 	}
 	
-	public func advancedBy(n: Fractional) -> Fractional {
+	public func advanced(by n: Fractional) -> Fractional {
 		let (selfNumerator, nNumerator, commonDenominator) = Fractional.commonDenominator(self, n)
 		return Fractional(numerator: selfNumerator + nNumerator, denominator: commonDenominator)
 	}
 	
-	public func distanceTo(other: Fractional) -> Fractional {
-		return other.advancedBy(-self)
+	public func distance(to other: Fractional) -> Fractional {
+		return other.advanced(by: -self)
 	}
 }
 
-extension Fractional: IntegerLiteralConvertible {
+extension Fractional: ExpressibleByIntegerLiteral {
 	public init(integerLiteral value: Number) {
 		self.init(value)
 	}
 }
 
-extension Fractional: SignedNumberType {}
-public prefix func -<Number: IntegerType>(value: Fractional<Number>) -> Fractional<Number> {
+extension Fractional: SignedNumber {}
+public prefix func -<Number: Integer>(value: Fractional<Number>) -> Fractional<Number> {
 	return Fractional(numerator: -1 * value.numerator, denominator: value.denominator)
 }
 
@@ -133,7 +134,7 @@ extension Fractional: CustomStringConvertible {
 }
 	
 /// Add `lhs` and `rhs`, returning a reduced result.
-public func +<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Fractional<Number> {
+public func +<Number: Integer>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Fractional<Number> {
 	guard !lhs.isNaN && !rhs.isNaN else { return .NaN }
 	guard lhs.isFinite && rhs.isFinite else {
 		switch (lhs >= 0, rhs >= 0) {
@@ -142,47 +143,47 @@ public func +<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Numb
 		default:			 return .NaN
 		}
 	}
-	return lhs.advancedBy(rhs)
+	return lhs.advanced(by: rhs)
 }
-public func +=<Number: IntegerType>(inout lhs: Fractional<Number>, rhs: Fractional<Number>) {
+public func +=<Number: Integer>(lhs: inout Fractional<Number>, rhs: Fractional<Number>) {
     lhs = lhs + rhs
 }
 
 /// Subtract `lhs` and `rhs`, returning a reduced result.
-public func -<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Fractional<Number> {
+public func -<Number: Integer>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Fractional<Number> {
 	return lhs + -rhs
 }
-public func -=<Number: IntegerType>(inout lhs: Fractional<Number>, rhs: Fractional<Number>) {
+public func -=<Number: Integer>(lhs: inout Fractional<Number>, rhs: Fractional<Number>) {
     lhs = lhs - rhs
 }
 
 /// Multiply `lhs` and `rhs`, returning a reduced result.
-public func *<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Fractional<Number> {
+public func *<Number: Integer>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Fractional<Number> {
 	let swapped = (Fractional(numerator: lhs.numerator, denominator: rhs.denominator), Fractional(numerator: rhs.numerator, denominator: lhs.denominator))
 	return Fractional(numerator: swapped.0.numerator * swapped.1.numerator, denominator: swapped.0.denominator * swapped.1.denominator)
 }
-public func *=<Number: IntegerType>(inout lhs: Fractional<Number>, rhs: Fractional<Number>) {
+public func *=<Number: Integer>(lhs: inout Fractional<Number>, rhs: Fractional<Number>) {
     lhs = lhs * rhs
 }
 
 /// Divide `lhs` and `rhs`, returning a reduced result.
-public func /<Number: IntegerType>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Fractional<Number> {
+public func /<Number: Integer>(lhs: Fractional<Number>, rhs: Fractional<Number>) -> Fractional<Number> {
 	return lhs * rhs.reciprocal
 }
-public func /=<Number: IntegerType>(inout lhs: Fractional<Number>, rhs: Fractional<Number>) {
+public func /=<Number: Integer>(lhs: inout Fractional<Number>, rhs: Fractional<Number>) {
     lhs = lhs / rhs
 }
 
 extension Double {
 	/// Create an instance initialized to `value`.
-	init<Number: IntegerType>(_ value: Fractional<Number>) {
+	init<Number: Integer>(_ value: Fractional<Number>) {
 		self.init(Double(value.numerator.toIntMax()) / Double(value.denominator.toIntMax()))
 	}
 }
 
 extension Float {
 	/// Create an instance initialized to `value`.
-	init<Number: IntegerType>(_ value: Fractional<Number>) {
+	init<Number: Integer>(_ value: Fractional<Number>) {
 		self.init(Float(value.numerator.toIntMax()) / Float(value.denominator.toIntMax()))
 	}
 }
